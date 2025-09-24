@@ -12,7 +12,6 @@ from kivy.core.window import Window
 from kivy.properties import BooleanProperty, StringProperty, ListProperty, NumericProperty
 import random
 from kivy.core.text import Label as CoreLabel
-from kivy.graphics import Color, Rectangle
 
 import serial
 import time
@@ -195,14 +194,7 @@ class TemperatureGraph(Widget):
 
             # Update the display
             self.update_canvas()
-def add_debug_bg(widget, rgba):
-    with widget.canvas.before:
-        Color(*rgba)   # e.g. (1, 0, 0, 0.3) for red, 30% opacity
-        widget._bg_rect = Rectangle(pos=widget.pos, size=widget.size)
 
-    # Keep rectangle in sync with widget size & position
-    widget.bind(pos=lambda inst, val: setattr(widget._bg_rect, 'pos', inst.pos),
-                size=lambda inst, val: setattr(widget._bg_rect, 'size', inst.size))
 
 class StartStopToggle(BoxLayout):
     is_active = BooleanProperty(False)
@@ -298,7 +290,6 @@ class Dashboard(BoxLayout):
             color=(0.8, 0.8, 0.8, 1)
         )
         left_panel.add_widget(radio_label)
-        add_debug_bg(left_panel, (1, 0, 0, 0.3))
 
         # Create radio buttons with dark theme and selection color
         self.radio_buttons = []
