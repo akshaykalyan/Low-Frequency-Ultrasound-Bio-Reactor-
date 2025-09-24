@@ -311,7 +311,7 @@ class Dashboard(BoxLayout):
             left_panel.add_widget(btn)
 
         # Set the first button as active
-        self.radio_buttons[0].state = 'on_touch_down'
+        self.radio_buttons[0].state = 'down'
         self.selected_mode = radio_options[0]
         self.update_radio_colors()
 
@@ -362,7 +362,7 @@ class Dashboard(BoxLayout):
             op_type_container.add_widget(btn)
 
         # Set the first button as active
-        self.op_type_buttons[0].state = 'on_touch_down'
+        self.op_type_buttons[0].state = 'down'
         self.selected_op_type = op_type_options[0]
         self.update_op_type_colors()
 
@@ -526,7 +526,7 @@ class Dashboard(BoxLayout):
 
     def update_radio_colors(self):
         for btn in self.radio_buttons:
-            if btn.state == 'on_touch_down':
+            if btn.state == 'down':
                 btn.background_color = (0.0, 0.5, 0.5, 1)  # Cyan when selected
                 btn.color = (1, 1, 1, 1)  # White text when selected
             else:
@@ -538,7 +538,7 @@ class Dashboard(BoxLayout):
 
     def update_op_type_colors(self):
         for btn in self.op_type_buttons:
-            if btn.state == 'on_touch_down':
+            if btn.state == 'down':
                 btn.background_color = (0.0, 0.5, 0.5, 1)  # Cyan when selected
                 btn.color = (1, 1, 1, 1)  # White text when selected
             else:
@@ -547,7 +547,7 @@ class Dashboard(BoxLayout):
 
     def radio_selected(self, instance):
         calibration_data ={5:10,10:25,30:75,50:100}
-        if instance.state == 'on_touch_down':
+        if instance.state == 'down':
             self.selected_mode = instance.text
             self.status_label.text = f'Sound Pressure: {self.selected_mode}'
             select_v =  int(self.selected_mode[:-3])
@@ -555,7 +555,7 @@ class Dashboard(BoxLayout):
 
 
     def op_type_selected(self, instance):
-        if instance.state == 'on_touch_down':
+        if instance.state == 'down':
             self.selected_op_type = instance.text
             self.op_status_label.text = f'Operation Type: {self.selected_op_type}'
             self.operation_value.text = self.selected_op_type
