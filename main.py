@@ -284,7 +284,7 @@ class Dashboard(BoxLayout):
         radio_label = Label(
             text='Select Sound Pressure',
             font_size='28sp',
-            size_hint_y=None,  # disable proportional sizing
+            size_hint_y=.12,  # disable proportional sizing
             height=50,  # fixed pixel height
             color=(0.8, 0.8, 0.8, 1)
         )
