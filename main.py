@@ -387,26 +387,26 @@ class Dashboard(BoxLayout):
         volt_freq_display = BoxLayout(orientation='horizontal', size_hint_y=0.12)  # Made consistent height
         volt_text = Label(
             text='Actuation Voltage:',
-            font_size='24sp',  # Increased font size for consistency
+            font_size='20sp',  # Increased font size for consistency
             size_hint_x=0.6,
             color=(0.8, 0.8, 0.8, 1)  # Light gray
         )
         self.volt_value = Label(
             text=f'{volt} Vrms',
-            font_size='24sp',  # Increased font size for consistency
+            font_size='20sp',  # Increased font size for consistency
             size_hint_x=0.6,
             color=(0.0, 0.8, 0.8, 1)  # Cyan
         )
 
         freq_text = Label(
             text='Frequency:',
-            font_size='24sp',  # Increased font size for consistency
+            font_size='20sp',  # Increased font size for consistency
             size_hint_x=0.6,
             color=(0.8, 0.8, 0.8, 1)  # Light gray
         )
         self.freq_value = Label(
             text='30 kHz',
-            font_size='24sp',  # Increased font size for consistency
+            font_size='20sp',  # Increased font size for consistency
             size_hint_x=0.6,
             color=(0.0, 0.8, 0.8, 1)  # Cyan
         )
