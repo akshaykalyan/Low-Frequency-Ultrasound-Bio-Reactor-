@@ -669,6 +669,7 @@ def start_pulsing(volt):
 def stop():
     print("stop")
     # amplifier_state = getAmplifierState()
+
     update('DISABLE', '')
 
 set_voltage(10)
