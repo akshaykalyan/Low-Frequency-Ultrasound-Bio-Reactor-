@@ -380,7 +380,7 @@ class Dashboard(BoxLayout):
         status_label = Label(
             text='Status',
             font_size='28sp',  # Increased font size for consistency
-            size_hint_y=0.12,  # Made consistent with other labels
+            size_hint_y= 0,  # Made consistent with other labels
             color=(0.8, 0.8, 0.8, 1)  # Light gray
         )
 
@@ -406,7 +406,7 @@ class Dashboard(BoxLayout):
             color=(0.8, 0.8, 0.8, 1)  # Light gray
         )
         self.freq_value = Label(
-            text='30 kHz',
+            text='40 kHz',
             font_size='20sp',  # Increased font size for consistency
             size_hint_x=0.6,
             color=(0.0, 0.8, 0.8, 1)  # Cyan
@@ -423,27 +423,27 @@ class Dashboard(BoxLayout):
         operation_running_display = BoxLayout(orientation='horizontal', size_hint_y=0.12)  # Made consistent height
         operation_type_text = Label(
             text='Operation Type:',
-            font_size='24sp',  # Increased font size for consistency
+            font_size='20sp',  # Increased font size for consistency
             size_hint_x=0.6,
             color=(0.8, 0.8, 0.8, 1)  # Light gray
         )
 
         self.operation_value = Label(
-            text='Continuous',
-            font_size='24sp',  # Increased font size for consistency
+            text='CONTINUOUS',
+            font_size='20sp',  # Increased font size for consistency
             size_hint_x=0.6,
             color=(0.0, 0.8, 0.8, 1)  # Cyan
         )
 
         running_time_text = Label(
             text='Running Time:',
-            font_size='24sp',  # Increased font size for consistency
+            font_size='20sp',  # Increased font size for consistency
             size_hint_x=0.6,
             color=(0.8, 0.8, 0.8, 1)  # Light gray
         )
         self.running_time_label = Label(
             text='0 s',
-            font_size='24sp',  # Increased font size for consistency
+            font_size='20sp',  # Increased font size for consistency
             size_hint_x=0.6,
             color=(0.0, 0.8, 0.8, 1)  # Cyan
         )
