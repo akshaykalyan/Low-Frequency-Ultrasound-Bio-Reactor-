@@ -1,4 +1,5 @@
-import traceback
+# Developed by Akshay
+# akshaykumar1@iisc.ac.in
 
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
