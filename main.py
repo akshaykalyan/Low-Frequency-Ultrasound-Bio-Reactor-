@@ -372,7 +372,8 @@ class Dashboard(BoxLayout):
         self.op_status_label = Label(
             text=f'Operation Type: {self.selected_op_type}',
             font_size='24sp',  # Increased font size for consistency
-            size_hint_y=0.12,  # Made consistent with other labels
+            size_hint_y=None,  # disable proportional sizing
+            height=50,  # same fixed pixel height
             color=(0.0, 0.8, 0.8, 1)  # Cyan
         )
 
