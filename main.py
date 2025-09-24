@@ -285,7 +285,7 @@ class Dashboard(BoxLayout):
         radio_label = Label(
             text='Select Sound Pressure',
             font_size='28sp',
-            size_hint_y=.12,  # disable proportional sizing
+            size_hint_y=None,  # disable proportional sizing
             height=50,  # fixed pixel height
             color=(0.8, 0.8, 0.8, 1)
         )
@@ -372,8 +372,7 @@ class Dashboard(BoxLayout):
         self.op_status_label = Label(
             text=f'Operation Type: {self.selected_op_type}',
             font_size='24sp',  # Increased font size for consistency
-            size_hint_y=None,  # disable proportional sizing
-            height=50,  # same fixed pixel height
+            size_hint_y=0.12,  # Made consistent with other labels
             color=(0.0, 0.8, 0.8, 1)  # Cyan
         )
 
