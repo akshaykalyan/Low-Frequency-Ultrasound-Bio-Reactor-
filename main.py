@@ -12,7 +12,6 @@ from kivy.core.window import Window
 from kivy.properties import BooleanProperty, StringProperty, ListProperty, NumericProperty
 import random
 from kivy.core.text import Label as CoreLabel
-from kivy.core.window import Window
 
 import serial
 import time
@@ -22,8 +21,8 @@ import threading
 
 
 # Set the window to fullscreen (for touchscreen)
-Window.size = (1280, 800)   # match your touchscreen’s resolution
-Window.fullscreen = False
+Window.fullscreen = 'auto'
+loop_stop = False
 
 class MeshLinePlot(Widget):
     def __init__(self, **kwargs):
