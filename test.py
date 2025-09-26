@@ -1,8 +1,11 @@
 from random import random
+from kivy.config import Config
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.graphics import Color, Ellipse, Line
 
+Config.set('input', 'rpitouch', 'mtdev,/dev/input/event0')
+Config.set('input', 'mouse', 'mouse')
 
 class MyPaintWidget(Widget):
 
