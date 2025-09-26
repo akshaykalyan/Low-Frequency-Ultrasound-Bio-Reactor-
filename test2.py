@@ -1,7 +1,10 @@
 # touch_diagnostic.py
 import subprocess
 import os
+os.environ['KIVY_INPUT'] = 'mtdev,/dev/input/event0'
 
+from kivy.config import Config
+Config.read('~/.kivy/config.ini')
 print("=== Touch Diagnostic ===")
 
 # Check input devices
