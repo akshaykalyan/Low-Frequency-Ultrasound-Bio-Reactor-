@@ -20,6 +20,7 @@ import threading
 from kivy.config import Config
 Config.set('input', 'mtdev_%(name)s', 'disabled')
 Config.set('input', 'hid_%(name)s', 'disabled')
+Config.set('input', 'mouse', 'mouse,disable_multitouch')
 
 # Set the window to fullscreen (for touchscreen)
 Window.fullscreen = 'auto'
