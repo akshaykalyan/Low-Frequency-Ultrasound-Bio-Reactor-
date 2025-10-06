@@ -16,9 +16,10 @@ from kivy.core.text import Label as CoreLabel
 import serial
 import time
 from struct import *
-import subprocess
 import threading
-
+from kivy.config import Config
+Config.set('input', 'mtdev_%(name)s', 'disabled')
+Config.set('input', 'hid_%(name)s', 'disabled')
 
 # Set the window to fullscreen (for touchscreen)
 Window.fullscreen = 'auto'
@@ -590,7 +591,8 @@ class Dashboard(BoxLayout):
                 # System just stopped
                 self.is_system_running = False
                 self.temp_graph.stop_recording()
-ser = serial.Serial(port='/dev/ttyUSB0', baudrate=9600, timeout=1)
+# ser = serial.Serial(port='/dev/ttyUSB0', baudrate=9600, timeout=1)
+ser = serial.Serial(port='COM3', baudrate=9600, timeout=1)
 is_pulsed = True
 volt = 0
 freq = 40000
