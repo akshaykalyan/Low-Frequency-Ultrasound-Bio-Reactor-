@@ -281,14 +281,14 @@ class Dashboard(BoxLayout):
         mb_logo = Image(
             source='logo/mb_dark.png',  # ← replace with your actual image path
             size_hint_x=None,
-            width=600,
+            width=200,
             allow_stretch=True,
             keep_ratio=True
         )
         all_logo = Image(
             source='logo/all_logo.jpg',  # ← replace with your actual image path
             size_hint_x=None,
-            width=400,
+            width=200,
             allow_stretch=True,
             keep_ratio=True
         )
