@@ -594,7 +594,7 @@ class Dashboard(BoxLayout):
                 self.temp_graph.start_recording()
 
             # Update running time
-            self.running_time += .5
+            self.running_time += 1
             self.running_time_label.text = f'{self.running_time} s'
 
             # Generate new temperature data (simulated)
