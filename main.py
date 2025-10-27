@@ -10,6 +10,8 @@ from kivy.clock import Clock
 from kivy.graphics import Color, Rectangle, Line, Ellipse
 from kivy.core.window import Window
 from kivy.properties import BooleanProperty, StringProperty, ListProperty, NumericProperty
+from kivy.uix.image import Image
+
 import random
 from kivy.core.text import Label as CoreLabel
 
@@ -272,9 +274,28 @@ class Dashboard(BoxLayout):
         title = Label(
             text='Low Frequency Ultrasound Bio-Reactor',
             font_size='36sp',
-            color=(0.8, 0.8, 0.8, 1)  # Light gray
+            color=(0.8, 0.8, 0.8, 1),  # Light gray
+            markup = True,  # enable markup
+
         )
+        mb_logo = Image(
+            source='logo/mb_dark.png',  # ← replace with your actual image path
+            size_hint_x=None,
+            width=600,
+            allow_stretch=True,
+            keep_ratio=True
+        )
+        all_logo = Image(
+            source='logo/all_logo.jpg',  # ← replace with your actual image path
+            size_hint_x=None,
+            width=400,
+            allow_stretch=True,
+            keep_ratio=True
+        )
+
+        header.add_widget(mb_logo)
         header.add_widget(title)
+        header.add_widget(all_logo)
         self.add_widget(header)
 
         # Main content area
@@ -593,7 +614,7 @@ class Dashboard(BoxLayout):
                 self.is_system_running = False
                 self.temp_graph.stop_recording()
 ser = serial.Serial(port='/dev/ttyUSB0', baudrate=9600, timeout=1)
-# ser = serial.Serial(port='COM3', baudrate=9600, timeout=1)
+# ser = serial.Serial(port='COM7', baudrate=9600, timeout=1)
 is_pulsed = True
 volt = 0
 freq = 40000
