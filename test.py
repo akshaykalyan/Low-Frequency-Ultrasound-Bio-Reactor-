@@ -613,8 +613,8 @@ class Dashboard(BoxLayout):
                 # System just stopped
                 self.is_system_running = False
                 self.temp_graph.stop_recording()
-# ser = serial.Serial(port='/dev/ttyUSB0', baudrate=9600, timeout=1)
-ser = serial.Serial(port='COM7', baudrate=9600, timeout=1)
+ser = serial.Serial(port='/dev/ttyUSB0', baudrate=9600, timeout=1)
+# ser = serial.Serial(port='COM7', baudrate=9600, timeout=1)
 is_pulsed = True
 volt = 0
 freq = 40000
