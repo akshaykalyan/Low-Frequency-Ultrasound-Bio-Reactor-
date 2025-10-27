@@ -272,7 +272,7 @@ class Dashboard(BoxLayout):
         header = BoxLayout(orientation='horizontal', size_hint_y=0.15)
 
         title = Label(
-            text='Low Frequency Ultrasound Bio-Reactor',
+            text='[b]Low Frequency Ultrasound Bio-Reactor[/b]',
             font_size='36sp',
             color=(0.8, 0.8, 0.8, 1),  # Light gray
             markup = True,  # enable markup
