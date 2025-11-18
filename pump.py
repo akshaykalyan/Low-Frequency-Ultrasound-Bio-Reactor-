@@ -7,7 +7,7 @@ class TB6600_Stepper:
         self.DIR = dir_pin
         self.ENA = ena_pin
 
-        self.steps_per_rev = 400
+        self.steps_per_rev = 400 # SW 3 & SW 6 is OFF 200
         self.microsteps = 1
         self.delay = 0.005
 
@@ -84,27 +84,5 @@ class TB6600_Stepper:
         self.disable()
         GPIO.cleanup()
         print("GPIO cleanup completed")
-
-
-
-stepper = TB6600_Stepper(pul_pin=8, dir_pin=10, ena_pin=13)
-
-# stepper.set_rpm(60)
-print("Test 1: 100 steps forward")
-stepper.set_rpm(60)
-print(stepper.delay)
-s= time.time()
-stepper.step(200)
-print(s-time.time())
-
-time.sleep(1)
-print(stepper.delay)
-print(stepper.get_rpm())
-print("Test 2: 100 steps backward")
-stepper.set_rpm(120)
-print(stepper.delay)
-
-stepper.step(-200)
-time.sleep(1)
 
 
