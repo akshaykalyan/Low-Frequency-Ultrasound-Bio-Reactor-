@@ -94,7 +94,7 @@ print("Test 1: 100 steps forward")
 stepper.set_rpm(60)
 print(stepper.delay)
 
-stepper.step(200)
+stepper.step(1200)
 time.sleep(1)
 print(stepper.delay)
 print(stepper.get_rpm())
