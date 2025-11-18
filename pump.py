@@ -84,7 +84,7 @@ class TB6600_Stepper:
 
 stepper = TB6600_Stepper(pul_pin=8, dir_pin=10, ena_pin=13)
 
-stepper.set_rpm(60)
+# stepper.set_rpm(60)
 print("Test 1: 100 steps forward")
 stepper.step(200)
 time.sleep(1)
