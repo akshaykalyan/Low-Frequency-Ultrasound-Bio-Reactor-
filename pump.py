@@ -85,4 +85,8 @@ class TB6600_Stepper:
         GPIO.cleanup()
         print("GPIO cleanup completed")
 
+stepper  = TB6600_Stepper(pul_pin=8, dir_pin=10, ena_pin=13)
 
+stepper.set_rpm(60)
+
+stepper.set_rpm(400)
