@@ -105,6 +105,4 @@ print(stepper.delay)
 stepper.step(-200)
 time.sleep(1)
 
-print("Test 3: 90 degree rotation")
-stepper.rotate_degrees(360, direction=True)
 
