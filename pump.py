@@ -7,7 +7,7 @@ class TB6600_Stepper:
         self.DIR = dir_pin
         self.ENA = ena_pin
 
-        self.steps_per_rev = 200
+        self.steps_per_rev = 400
         self.microsteps = 1
         self.delay = 0.005
 
