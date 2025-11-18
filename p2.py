@@ -1,4 +1,4 @@
-from rpi_lgpio import GPIO
+import RPi.GPIO as GPIO
 import time
 import kivy
 from kivy.app import App
