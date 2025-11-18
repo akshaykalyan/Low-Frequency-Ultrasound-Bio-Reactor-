@@ -26,7 +26,7 @@ class TB6600_Stepper:
 
         self.steps_per_rev = 200 # SW 3 & SW 6 is OFF 200
         self.microsteps = 1
-        self.delay = 0.025
+        self.delay = 0.0025
 
         try:
             # Use BOARD numbering instead of BCM to avoid conflicts
@@ -105,6 +105,8 @@ class TB6600_Stepper:
 
 
 class StepperControlPanel(BoxLayout):
+    count = 0
+
     def __init__(self, stepper, **kwargs):
         super().__init__(**kwargs)
         self.stepper = stepper
@@ -218,14 +220,14 @@ class StepperControlPanel(BoxLayout):
             self.status_indicator.text = 'STOPPED'
             self.status_indicator.color = (1, 0.3, 0.3, 1)
             Clock.unschedule(self.continuous_step)
-
     def continuous_step(self, dt):
         # Move one step continuously while motor is running
+        self.count = self.count + 1
+        print(self.count)
         self.stepper.enable()
         self.stepper.set_direction(self.current_direction)
         GPIO.output(self.stepper.PUL, GPIO.HIGH)
         time.sleep(self.stepper.delay)
-        print(self.stepper.delay)
         GPIO.output(self.stepper.PUL, GPIO.LOW)
         time.sleep(self.stepper.delay)
 
