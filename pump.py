@@ -49,10 +49,10 @@ class TB6600_Stepper:
 
         if rpm <= 0:
             raise ValueError("RPM must be greater than 0")
-        self.delay = 60/(self.microsteps*rpm)
+        self.delay = 60/(self.steps_per_rev*rpm)
 
     def get_rpm(self):
-        return 60/(self.microsteps*self.delay)
+        return 60/(self.steps_per_rev*self.delay)
 
     def step(self, steps=1):
         if steps == 0:
