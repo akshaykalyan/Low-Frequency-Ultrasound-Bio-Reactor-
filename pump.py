@@ -91,12 +91,15 @@ stepper = TB6600_Stepper(pul_pin=8, dir_pin=10, ena_pin=13)
 
 # stepper.set_rpm(60)
 print("Test 1: 100 steps forward")
+stepper.set_rpm(60)
+
 stepper.step(200)
 time.sleep(1)
-stepper.set_rpm(30)
 print(stepper.delay)
 print(stepper.get_rpm())
 print("Test 2: 100 steps backward")
+stepper.set_rpm(120)
+
 stepper.step(-200)
 time.sleep(1)
 
