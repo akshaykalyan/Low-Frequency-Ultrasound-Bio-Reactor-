@@ -168,24 +168,24 @@ class StepperControlPanel(BoxLayout):
         self.stepper.start()
 
         # Status indicator
-        self.status_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.1))
+        self.status_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.15))
         self.status_indicator = Label(
             text='STOPPED',
-            font_size='20sp',
+            font_size='24sp',
             color=(1, 0.3, 0.3, 1),
             bold=True
         )
-        self.status_layout.add_widget(Label(text='Status:', font_size='18sp', color=(0.8, 0.8, 0.8, 1)))
+        self.status_layout.add_widget(Label(text='Status:', font_size='20sp', color=(0.8, 0.8, 0.8, 1)))
         self.status_layout.add_widget(self.status_indicator)
         self.add_widget(self.status_layout)
 
         # Control buttons
-        self.control_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.15))
+        self.control_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.2))
 
         self.start_btn = Button(
             text='START',
             background_color=(0.2, 0.7, 0.2, 1),
-            font_size='18sp',
+            font_size='20sp',
             bold=True
         )
         self.start_btn.bind(on_press=self.start_motor)
@@ -193,7 +193,7 @@ class StepperControlPanel(BoxLayout):
         self.stop_btn = Button(
             text='STOP',
             background_color=(0.8, 0.2, 0.2, 1),
-            font_size='18sp',
+            font_size='20sp',
             bold=True
         )
         self.stop_btn.bind(on_press=self.stop_motor)
@@ -203,10 +203,10 @@ class StepperControlPanel(BoxLayout):
         self.add_widget(self.control_layout)
 
         # RPM Control
-        self.rpm_layout = BoxLayout(orientation='vertical', size_hint=(1, 0.2))
+        self.rpm_layout = BoxLayout(orientation='vertical', size_hint=(1, 0.25))
         self.rpm_label = Label(
             text=f'RPM: {self.stepper.get_rpm():.1f}',
-            font_size='18sp',
+            font_size='20sp',
             color=(0.8, 0.8, 0.8, 1)
         )
         self.rpm_slider = Slider(
@@ -224,10 +224,10 @@ class StepperControlPanel(BoxLayout):
         self.add_widget(self.rpm_layout)
 
         # Direction Control
-        self.dir_layout = BoxLayout(orientation='vertical', size_hint=(1, 0.15))
+        self.dir_layout = BoxLayout(orientation='vertical', size_hint=(1, 0.2))
         self.dir_label = Label(
             text='DIRECTION',
-            font_size='18sp',
+            font_size='20sp',
             color=(0.8, 0.8, 0.8, 1)
         )
 
@@ -237,14 +237,16 @@ class StepperControlPanel(BoxLayout):
             text='CLOCKWISE',
             group='direction',
             state='down',
-            background_color=(0.3, 0.5, 0.8, 1)
+            background_color=(0.3, 0.5, 0.8, 1),
+            font_size='16sp'
         )
         self.cw_btn.bind(on_press=lambda x: self.set_direction(True))
 
         self.ccw_btn = ToggleButton(
             text='COUNTER-CLOCKWISE',
             group='direction',
-            background_color=(0.3, 0.5, 0.8, 1)
+            background_color=(0.3, 0.5, 0.8, 1),
+            font_size='16sp'
         )
         self.ccw_btn.bind(on_press=lambda x: self.set_direction(False))
 
@@ -254,45 +256,6 @@ class StepperControlPanel(BoxLayout):
         self.dir_layout.add_widget(self.dir_label)
         self.dir_layout.add_widget(self.dir_buttons_layout)
         self.add_widget(self.dir_layout)
-
-        # Step Control
-        self.step_layout = BoxLayout(orientation='vertical', size_hint=(1, 0.2))
-        self.step_label = Label(
-            text='STEP CONTROL',
-            font_size='18sp',
-            color=(0.8, 0.8, 0.8, 1)
-        )
-
-        self.step_buttons_layout = GridLayout(cols=3, rows=2, size_hint=(1, 0.8))
-
-        step_buttons = [
-            ('1 Step', 1), ('10 Steps', 10), ('100 Steps', 100),
-            ('1 Rev', 400), ('90°', 100), ('180°', 200)
-        ]
-
-        for text, steps in step_buttons:
-            btn = Button(
-                text=text,
-                background_color=(0.4, 0.4, 0.6, 1),
-                font_size='14sp'
-            )
-            btn.bind(on_press=lambda instance, s=steps: self.move_steps(s))
-            self.step_buttons_layout.add_widget(btn)
-
-        self.step_layout.add_widget(self.step_label)
-        self.step_layout.add_widget(self.step_buttons_layout)
-        self.add_widget(self.step_layout)
-
-        # Manual step control
-        self.manual_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.1))
-        self.manual_btn = Button(
-            text='MANUAL STEP',
-            background_color=(0.6, 0.4, 0.4, 1),
-            font_size='16sp'
-        )
-        self.manual_btn.bind(on_press=lambda x: self.move_steps(1))
-        self.manual_layout.add_widget(self.manual_btn)
-        self.add_widget(self.manual_layout)
 
         # Initialize state
         self.motor_running = False
@@ -327,13 +290,6 @@ class StepperControlPanel(BoxLayout):
         if self.motor_running:
             self.stepper.stop_continuous()
             self.stepper.start_continuous(direction)
-
-    def move_steps(self, steps):
-        if not self.motor_running:  # Only allow manual steps when not running continuously
-            try:
-                self.stepper.step(steps)
-            except Exception as e:
-                self.show_error("Step Error", str(e))
 
     def show_error(self, title, message):
         content = BoxLayout(orientation='vertical', padding=10, spacing=10)
