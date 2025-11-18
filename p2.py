@@ -18,16 +18,15 @@ from kivy.graphics import Color, Rectangle
 # Set dark theme colors
 Window.clearcolor = (0.1, 0.1, 0.1, 1)  # Dark background
 
-
 class TB6600_Stepper:
     def __init__(self, pul_pin, dir_pin, ena_pin=None):
         self.PUL = pul_pin
         self.DIR = dir_pin
         self.ENA = ena_pin
 
-        self.steps_per_rev = 400  # SW 3 & SW 6 is OFF 200
+        self.steps_per_rev = 200 # SW 3 & SW 6 is OFF 200
         self.microsteps = 1
-        self.delay = 0.005
+        self.delay = 0.025
 
         try:
             # Use BOARD numbering instead of BCM to avoid conflicts
@@ -64,13 +63,14 @@ class TB6600_Stepper:
         GPIO.output(self.DIR, GPIO.HIGH if direction else GPIO.LOW)
 
     def set_rpm(self, rpm):
+
         if rpm <= 0:
             raise ValueError("RPM must be greater than 0")
 
-        self.delay = 60 / (self.steps_per_rev * rpm)
+        self.delay = 30/(self.steps_per_rev*rpm)
 
     def get_rpm(self):
-        return 60 / (self.steps_per_rev * self.delay)
+        return 60/(self.steps_per_rev*self.delay)
 
     def step(self, steps=1):
         if steps == 0:
@@ -203,43 +203,35 @@ class StepperControlPanel(BoxLayout):
         # Initialize state
         self.motor_running = False
         self.current_direction = True  # Clockwise
-        self.steps_per_cycle = 10  # Number of steps per continuous cycle
 
     def start_motor(self, instance):
         if not self.motor_running:
             self.motor_running = True
             self.status_indicator.text = 'RUNNING'
             self.status_indicator.color = (0.3, 1, 0.3, 1)
-            # Start continuous stepping using the step function
-            Clock.schedule_interval(self.continuous_stepping, 0.1)  # Adjust interval as needed
+            # Start continuous rotation
+            Clock.schedule_interval(self.continuous_step, 1.0 / 60.0)  # Update at 60Hz
 
     def stop_motor(self, instance):
         if self.motor_running:
             self.motor_running = False
             self.status_indicator.text = 'STOPPED'
             self.status_indicator.color = (1, 0.3, 0.3, 1)
-            Clock.unschedule(self.continuous_stepping)
+            Clock.unschedule(self.continuous_step)
 
-    def continuous_stepping(self, dt):
-        # Use the step function for continuous movement
-        if self.motor_running:
-            steps = self.steps_per_cycle if self.current_direction else -self.steps_per_cycle
-            self.stepper.step(steps)
+    def continuous_step(self, dt):
+        # Move one step continuously while motor is running
+        self.stepper.enable()
+        self.stepper.set_direction(self.current_direction)
+        GPIO.output(self.stepper.PUL, GPIO.HIGH)
+        time.sleep(self.stepper.delay)
+        GPIO.output(self.stepper.PUL, GPIO.LOW)
+        time.sleep(self.stepper.delay)
 
     def update_rpm(self, instance, value):
         try:
             self.stepper.set_rpm(value)
             self.rpm_label.text = f'RPM: {value:.1f}'
-
-            # Adjust steps_per_cycle based on RPM for smoother operation
-            # Higher RPM = fewer steps per cycle to maintain responsiveness
-            if value > 50:
-                self.steps_per_cycle = 5
-            elif value > 20:
-                self.steps_per_cycle = 10
-            else:
-                self.steps_per_cycle = 20
-
         except ValueError as e:
             self.show_error("RPM Error", str(e))
 
@@ -282,3 +274,4 @@ if __name__ == '__main__':
         print(f"App error: {e}")
     finally:
         GPIO.cleanup()
+
