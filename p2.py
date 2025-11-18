@@ -1,4 +1,4 @@
-import RPi.GPIO as GPIO
+from rpi_lgpio import GPIO
 import time
 import kivy
 from kivy.app import App
@@ -200,45 +200,6 @@ class StepperControlPanel(BoxLayout):
         self.dir_layout.add_widget(self.dir_buttons_layout)
         self.add_widget(self.dir_layout)
 
-        # Step Control
-        self.step_layout = BoxLayout(orientation='vertical', size_hint=(1, 0.2))
-        self.step_label = Label(
-            text='STEP CONTROL',
-            font_size='18sp',
-            color=(0.8, 0.8, 0.8, 1)
-        )
-
-        self.step_buttons_layout = GridLayout(cols=3, rows=2, size_hint=(1, 0.8))
-
-        step_buttons = [
-            ('1 Step', 1), ('10 Steps', 10), ('100 Steps', 100),
-            ('1 Rev', 400), ('90°', 100), ('180°', 200)
-        ]
-
-        for text, steps in step_buttons:
-            btn = Button(
-                text=text,
-                background_color=(0.4, 0.4, 0.6, 1),
-                font_size='14sp'
-            )
-            btn.bind(on_press=lambda instance, s=steps: self.move_steps(s))
-            self.step_buttons_layout.add_widget(btn)
-
-        self.step_layout.add_widget(self.step_label)
-        self.step_layout.add_widget(self.step_buttons_layout)
-        self.add_widget(self.step_layout)
-
-        # Manual step control
-        self.manual_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.1))
-        self.manual_btn = Button(
-            text='MANUAL STEP',
-            background_color=(0.6, 0.4, 0.4, 1),
-            font_size='16sp'
-        )
-        self.manual_btn.bind(on_press=lambda x: self.move_steps(1))
-        self.manual_layout.add_widget(self.manual_btn)
-        self.add_widget(self.manual_layout)
-
         # Initialize state
         self.motor_running = False
         self.current_direction = True  # Clockwise
@@ -277,13 +238,6 @@ class StepperControlPanel(BoxLayout):
     def set_direction(self, direction):
         self.current_direction = direction
         self.stepper.set_direction(direction)
-
-    def move_steps(self, steps):
-        if not self.motor_running:  # Only allow manual steps when not running continuously
-            try:
-                self.stepper.step(steps)
-            except Exception as e:
-                self.show_error("Step Error", str(e))
 
     def show_error(self, title, message):
         content = BoxLayout(orientation='vertical', padding=10, spacing=10)
