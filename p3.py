@@ -3,13 +3,19 @@ import time
 import kivy
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.slider import Slider
+from kivy.uix.progressbar import ProgressBar
+from kivy.uix.switch import Switch
 from kivy.uix.popup import Popup
 from kivy.clock import Clock
 from kivy.core.window import Window
+from kivy.graphics import Color, Rectangle
+from threading import Thread
+import queue
 
 # Set dark theme colors
 Window.clearcolor = (0.1, 0.1, 0.1, 1)  # Dark background
@@ -21,11 +27,12 @@ class TB6600_Stepper:
         self.DIR = dir_pin
         self.ENA = ena_pin
 
-        self.steps_per_rev = 200  # SW 3 & SW 6 is OFF 200
+        self.steps_per_rev = 400  # SW 3 & SW 6 is OFF 200
         self.microsteps = 1
-        self.delay = 0.0005  # Start with faster default delay
-        self.last_pulse_time = 0
-        self.pulse_state = False
+        self.delay = 0.005
+        self.running = False
+        self.step_queue = queue.Queue()
+        self.continuous_mode = False
 
         try:
             # Use BOARD numbering instead of BCM to avoid conflicts
@@ -64,54 +71,87 @@ class TB6600_Stepper:
     def set_rpm(self, rpm):
         if rpm <= 0:
             raise ValueError("RPM must be greater than 0")
-        # Calculate delay between steps (seconds)
-        # RPM to steps per second: (RPM * steps_per_rev) / 60
-        # Delay = 1 / (steps per second)
-        steps_per_second = (rpm * self.steps_per_rev) / 60.0
-        self.delay = 1.0 / (2.0 * steps_per_second)  # Divide by 2 for HIGH-LOW cycle
+        self.delay = 60.0 / (self.steps_per_rev * rpm * 2)  # Account for both HIGH and LOW delays
 
     def get_rpm(self):
-        steps_per_second = 1.0 / (2.0 * self.delay)
-        return (steps_per_second * 60.0) / self.steps_per_rev
+        if self.delay <= 0:
+            return 0
+        return 60.0 / (self.steps_per_rev * self.delay * 2)  # Account for both HIGH and LOW delays
 
     def step(self, steps=1):
-        if steps == 0:
-            return
+        """Add steps to the queue for processing"""
+        if steps != 0:
+            self.step_queue.put(('steps', abs(steps), steps > 0))
 
-        direction = steps > 0
-        steps = abs(steps)
+    def start_continuous(self, direction):
+        """Start continuous rotation"""
+        self.continuous_mode = True
+        self.step_queue.put(('continuous', direction))
 
-        self.enable()
-        self.set_direction(direction)
+    def stop_continuous(self):
+        """Stop continuous rotation"""
+        self.continuous_mode = False
+        self.step_queue.put(('stop',))
 
-        print(f"Moving {steps} steps {'forward' if direction else 'backward'}")
+    def _step_thread(self):
+        """Background thread for handling stepper pulses without blocking UI"""
+        while self.running:
+            try:
+                # Check for new commands with timeout to allow checking running flag
+                command = self.step_queue.get(timeout=0.1)
 
-        for i in range(steps):
-            GPIO.output(self.PUL, GPIO.HIGH)
-            time.sleep(self.delay)
-            GPIO.output(self.PUL, GPIO.LOW)
-            time.sleep(self.delay)
+                if command[0] == 'steps':
+                    _, steps, direction = command
+                    self.enable()
+                    self.set_direction(direction)
 
-            # Show progress every 50 steps
-            if (i + 1) % 50 == 0:
-                print(f"Completed {i + 1}/{steps} steps")
+                    for i in range(steps):
+                        if not self.running:
+                            break
+                        GPIO.output(self.PUL, GPIO.HIGH)
+                        time.sleep(self.delay)
+                        GPIO.output(self.PUL, GPIO.LOW)
+                        time.sleep(self.delay)
 
-    def should_pulse(self, current_time):
-        """Check if it's time to generate the next pulse"""
-        return current_time - self.last_pulse_time >= self.delay
+                elif command[0] == 'continuous':
+                    _, direction = command
+                    self.enable()
+                    self.set_direction(direction)
 
-    def do_pulse(self, current_time):
-        """Execute one pulse cycle"""
-        # Toggle pulse state
-        self.pulse_state = not self.pulse_state
-        GPIO.output(self.PUL, self.pulse_state)
+                    while self.continuous_mode and self.running:
+                        GPIO.output(self.PUL, GPIO.HIGH)
+                        time.sleep(self.delay)
+                        GPIO.output(self.PUL, GPIO.LOW)
+                        time.sleep(self.delay)
 
-        # Only update time when completing a full cycle (returning to LOW)
-        if not self.pulse_state:
-            self.last_pulse_time = current_time
+                elif command[0] == 'stop':
+                    self.continuous_mode = False
+
+            except queue.Empty:
+                continue
+            except Exception as e:
+                print(f"Step thread error: {e}")
+
+    def start(self):
+        """Start the stepper thread"""
+        if not self.running:
+            self.running = True
+            self.thread = Thread(target=self._step_thread, daemon=True)
+            self.thread.start()
+
+    def stop(self):
+        """Stop the stepper thread"""
+        self.running = False
+        self.continuous_mode = False
+        self.disable()
+
+    def rotate_degrees(self, degrees, direction=True):
+        steps = int((degrees / 360) * self.steps_per_rev * self.microsteps)
+        self.step(steps if direction else -steps)
 
     def cleanup(self):
-        self.disable()
+        self.stop()
+        time.sleep(0.2)  # Allow thread to finish
         GPIO.cleanup()
         print("GPIO cleanup completed")
 
@@ -123,6 +163,9 @@ class StepperControlPanel(BoxLayout):
         self.orientation = 'vertical'
         self.padding = 20
         self.spacing = 15
+
+        # Start the stepper thread
+        self.stepper.start()
 
         # Status indicator
         self.status_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.1))
@@ -168,7 +211,7 @@ class StepperControlPanel(BoxLayout):
         )
         self.rpm_slider = Slider(
             min=1,
-            max=300,  # Increased max RPM
+            max=100,
             value=self.stepper.get_rpm(),
             step=1,
             value_track=True,
@@ -179,14 +222,6 @@ class StepperControlPanel(BoxLayout):
         self.rpm_layout.add_widget(self.rpm_label)
         self.rpm_layout.add_widget(self.rpm_slider)
         self.add_widget(self.rpm_layout)
-
-        # Speed display
-        self.speed_info = Label(
-            text=f'Delay: {self.stepper.delay * 1000:.2f}ms per half-step',
-            font_size='14sp',
-            color=(0.6, 0.6, 0.6, 1)
-        )
-        self.add_widget(self.speed_info)
 
         # Direction Control
         self.dir_layout = BoxLayout(orientation='vertical', size_hint=(1, 0.15))
@@ -220,6 +255,45 @@ class StepperControlPanel(BoxLayout):
         self.dir_layout.add_widget(self.dir_buttons_layout)
         self.add_widget(self.dir_layout)
 
+        # Step Control
+        self.step_layout = BoxLayout(orientation='vertical', size_hint=(1, 0.2))
+        self.step_label = Label(
+            text='STEP CONTROL',
+            font_size='18sp',
+            color=(0.8, 0.8, 0.8, 1)
+        )
+
+        self.step_buttons_layout = GridLayout(cols=3, rows=2, size_hint=(1, 0.8))
+
+        step_buttons = [
+            ('1 Step', 1), ('10 Steps', 10), ('100 Steps', 100),
+            ('1 Rev', 400), ('90°', 100), ('180°', 200)
+        ]
+
+        for text, steps in step_buttons:
+            btn = Button(
+                text=text,
+                background_color=(0.4, 0.4, 0.6, 1),
+                font_size='14sp'
+            )
+            btn.bind(on_press=lambda instance, s=steps: self.move_steps(s))
+            self.step_buttons_layout.add_widget(btn)
+
+        self.step_layout.add_widget(self.step_label)
+        self.step_layout.add_widget(self.step_buttons_layout)
+        self.add_widget(self.step_layout)
+
+        # Manual step control
+        self.manual_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.1))
+        self.manual_btn = Button(
+            text='MANUAL STEP',
+            background_color=(0.6, 0.4, 0.4, 1),
+            font_size='16sp'
+        )
+        self.manual_btn.bind(on_press=lambda x: self.move_steps(1))
+        self.manual_layout.add_widget(self.manual_btn)
+        self.add_widget(self.manual_layout)
+
         # Initialize state
         self.motor_running = False
         self.current_direction = True  # Clockwise
@@ -229,38 +303,37 @@ class StepperControlPanel(BoxLayout):
             self.motor_running = True
             self.status_indicator.text = 'RUNNING'
             self.status_indicator.color = (0.3, 1, 0.3, 1)
-            self.stepper.enable()
-            self.stepper.set_direction(self.current_direction)
-            # Reset timing
-            self.stepper.last_pulse_time = time.time()
-            # Start continuous rotation with high frequency updates
-            Clock.schedule_interval(self.continuous_step, 0.0001)  # Very fast updates
+            # Start continuous rotation in background thread
+            self.stepper.start_continuous(self.current_direction)
 
     def stop_motor(self, instance):
         if self.motor_running:
             self.motor_running = False
             self.status_indicator.text = 'STOPPED'
             self.status_indicator.color = (1, 0.3, 0.3, 1)
-            Clock.unschedule(self.continuous_step)
-            GPIO.output(self.stepper.PUL, GPIO.LOW)  # Ensure pulse is low when stopped
-
-    def continuous_step(self, dt):
-        """Non-blocking continuous stepping"""
-        current_time = time.time()
-        if self.stepper.should_pulse(current_time):
-            self.stepper.do_pulse(current_time)
+            self.stepper.stop_continuous()
 
     def update_rpm(self, instance, value):
         try:
             self.stepper.set_rpm(value)
             self.rpm_label.text = f'RPM: {value:.1f}'
-            self.speed_info.text = f'Delay: {self.stepper.delay * 1000:.2f}ms per half-step'
         except ValueError as e:
             self.show_error("RPM Error", str(e))
 
     def set_direction(self, direction):
         self.current_direction = direction
         self.stepper.set_direction(direction)
+        # If motor is running, update direction immediately
+        if self.motor_running:
+            self.stepper.stop_continuous()
+            self.stepper.start_continuous(direction)
+
+    def move_steps(self, steps):
+        if not self.motor_running:  # Only allow manual steps when not running continuously
+            try:
+                self.stepper.step(steps)
+            except Exception as e:
+                self.show_error("Step Error", str(e))
 
     def show_error(self, title, message):
         content = BoxLayout(orientation='vertical', padding=10, spacing=10)
@@ -276,6 +349,7 @@ class StepperControlApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # Initialize stepper with your GPIO pins
+        # Replace these pin numbers with your actual GPIO pins
         self.stepper = TB6600_Stepper(pul_pin=8, dir_pin=10, ena_pin=15)
 
     def build(self):
