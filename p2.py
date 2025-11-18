@@ -156,7 +156,7 @@ class StepperControlPanel(BoxLayout):
         )
         self.rpm_slider = Slider(
             min=1,
-            max=100,
+            max=200,
             value=self.stepper.get_rpm(),
             step=1,
             value_track=True,
