@@ -44,10 +44,15 @@ class TB6600_Stepper:
 
     def set_direction(self, direction):
         GPIO.output(self.DIR, GPIO.HIGH if direction else GPIO.LOW)
+
     def set_rpm(self, rpm):
-        self.delay = (rpm/60) / self.microsteps
+
+        if rpm <= 0:
+            raise ValueError("RPM must be greater than 0")
+        self.delay = 60/(self.microsteps*rpm)
+
     def get_rpm(self):
-        return self.delay * self.microsteps *60
+        return 60/(self.microsteps*self.delay)
 
     def step(self, steps=1):
         if steps == 0:
