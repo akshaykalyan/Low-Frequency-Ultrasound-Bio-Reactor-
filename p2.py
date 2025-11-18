@@ -225,6 +225,7 @@ class StepperControlPanel(BoxLayout):
         self.stepper.set_direction(self.current_direction)
         GPIO.output(self.stepper.PUL, GPIO.HIGH)
         time.sleep(self.stepper.delay)
+        print(self.stepper.delay)
         GPIO.output(self.stepper.PUL, GPIO.LOW)
         time.sleep(self.stepper.delay)
 
