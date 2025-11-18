@@ -63,7 +63,6 @@ class TB6600_Stepper:
         GPIO.output(self.DIR, GPIO.HIGH if direction else GPIO.LOW)
 
     def set_rpm(self, rpm):
-
         if rpm <= 0:
             raise ValueError("RPM must be greater than 0")
 
